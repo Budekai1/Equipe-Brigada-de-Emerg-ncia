@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipe Brigada de Emergência</title>
+    <style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f4f6f8;
+    color: #333;
+    padding: 20px;
+}
+
+/* Painel de Controle (Não sai na impressão) */
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.btn {
+    background-color: #8B0000;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background 0.2s;
+}
+
+.btn:hover {
+    background-color: #5c0000;
+}
+
+.btn-print {
+    background-color: #333;
+}
+
+.btn-print:hover {
+    background-color: #111;
+}
+
+/* Container Principal A4 Paisagem Compacto */
+.a4-sheet {
+    width: 297mm;
+    min-height: 210mm;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 10mm 15mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    border: 1px solid #dcdcdc;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* Cabeçalho com Título, Subtítulo e Logo Expandido */
+header {
+    display: grid;
+    grid-template-columns: 1fr 105px;
+    align-items: center;
+    border-bottom: 2.5px solid #8B0000;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.header-text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+h1 {
+    color: #8B0000;
+    font-size: 30px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: left;
+    margin-bottom: 2px;
+    white-space: nowrap;
+}
+
+.subtitle {
+    color: #555555;
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 3px;
+}
+
+.header-logo-container {
+    width: 92px;
+    height: 92px;
+    border: 3px solid #8B0000;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    cursor: pointer;
+    position: relative;
+    grid-column: 2;
+    justify-self: end;
+    align-self: center;
+}
+
+.header-logo-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.header-logo-container input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+#headerLogoText {
+    font-size: 11px;
+    color: #8B0000;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Grade com Zoom Real e Cards Próximos */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px 16px;
+    justify-items: center;
+}
+
+/* Card do Membro com Zoom */
+.member-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    max-width: 160px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+/* Estilos ativados no Modo de Edição */
+.member-card.editable {
+    cursor: grab;
+    border: 2px dashed #8B0000;
+    background-color: #fff9f9;
+}
+
+.member-card.editable:active {
+    cursor: grabbing;
+}
+
+.member-card.dragging {
+    opacity: 0.4;
+}
+
+.member-card.drag-over {
+    background-color: #ffcccc;
+    transform: scale(1.03);
+}
+
+/* Botão para remover membro individual */
+.btn-remove {
+    position: absolute;
+    top: -4px;
+    right: 2px;
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.btn-remove:hover {
+    background: #cc0000;
+}
+
+/* Foto do Membro com Zoom Real */
+.photo-container {
+    width: 105px;
+    height: 105px;
+    border: 3px solid #8B0000;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: -4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    z-index: 5;
+}
+
+.photo-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-container input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.photo-placeholder {
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+    padding: 5px;
+    font-weight: bold;
+}
+
+/* Caixas de Texto com Zoom */
+.info-box {
+    width: 100%;
+    text-align: center;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid #c0c0c0;
+}
+
+.name-input, .turn-select {
+    width: 100%;
+    border: none;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px 4px;
+    outline: none;
+}
+
+.name-input {
+    background-color: #7A1C1C;
+    color: white;
+    margin-bottom: 1px;
+}
+
+.name-input::placeholder {
+    color: #f0d0d0;
+}
+
+.turn-select {
+    background-color: #A63A3A;
+    color: white;
+}
+
+.turn-select::placeholder {
+    color: #f0d0d0;
+}
+
+/* Estilos de Impressão */
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 4mm;
+    }
+
+    body {
+        background: none;
+        padding: 0;
+    }
+    .controls, .btn-remove {
+        display: none !important;
+    }
+    .a4-sheet {
+        width: 100% !important;
+        min-height: auto !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 8mm 12mm !important;
+        box-shadow: none !important;
+        border: 1px solid #dcdcdc !important;
+        border-radius: 12px !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    input {
+        border: none !important;
+    }
+    .name-input {
+        background-color: #7A1C1C !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .turn-select {
+        background-color: #A63A3A !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <!-- Controles de Ação (Não saem na impressão) -->
+    <div class="controls">
+        <button class="btn" onclick="addMember()">+ Adicionar Membro</button>
+        <button class="btn" onclick="addLeader()">+ Adicionar Líder</button>
+        <button class="btn" id="btnToggleEdit" onclick="toggleEditMode()" style="background-color: #d9534f;">Modo Edição: OFF</button>
+        <button class="btn btn-print" onclick="window.print()">Imprimir / Salvar PDF</button>
+    </div>
+
+    <!-- Folha A4 Paisagem -->
+    <div class="a4-sheet">
+        <header>
+            <div class="header-text-container">
+                <h1>Equipe Brigada de Emergência</h1>
+                <p class="subtitle">Estrutura de resposta rápida e segurança operacional</p>
+            </div>
+
+            <div class="header-logo-container" title="Clique para alterar o ícone">
+                <img id="headerLogoImg" src="" alt="Ícone" style="display: none;">
+                <span id="headerLogoText">LOGO</span>
+                <input type="file" accept="image/*" onchange="loadHeaderLogo(event)">
+            </div>
+        </header>
+
+        <div class="grid-container" id="membersGrid">
+            <!-- Os cards serão inseridos dinamicamente aqui -->
+        </div>
+    </div>
+
+    <script>
+let isEditMode = false;
+
+function loadHeaderLogo(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById('headerLogoImg');
+            const txt = document.getElementById('headerLogoText');
+            img.src = e.target.result;
+            img.style.display = 'block';
+            txt.style.display = 'none';
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+function loadMemberPhoto(event, inputElement) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const container = inputElement.parentElement;
+            let img = container.querySelector('img');
+            let placeholder = container.querySelector('.photo-placeholder');
+            
+            if (!img) {
+                img = document.createElement('img');
+                container.appendChild(img);
+            }
+            img.src = e.target.result;
+            img.style.display = 'block';
+            if (placeholder) placeholder.style.display = 'none';
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+// Botão para alternar o Modo de Edição
+function toggleEditMode() {
+    isEditMode = !isEditMode;
+    const btn = document.getElementById('btnToggleEdit');
+    const cards = document.querySelectorAll('.member-card');
+
+    if (isEditMode) {
+        btn.textContent = "Modo Edição: ON";
+        btn.style.backgroundColor = "#28a745";
+        cards.forEach(card => {
+            card.classList.add('editable');
+            card.setAttribute('draggable', 'true');
+        });
+    } else {
+        btn.textContent = "Modo Edição: OFF";
+        btn.style.backgroundColor = "#d9534f";
+        cards.forEach(card => {
+            card.classList.remove('editable');
+            card.removeAttribute('draggable');
+        });
+    }
+}
+
+// Funções de Arrastar e Soltar (Drag and Drop)
+let draggedCard = null;
+
+function handleDragStart(e) {
+    if (!isEditMode) return;
+    draggedCard = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDragOver(e) {
+    if (!isEditMode) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+}
+
+function handleDragEnter(e) {
+    if (!isEditMode) return;
+    if (this !== draggedCard) {
+        this.classList.add('drag-over');
+    }
+}
+
+function handleDragLeave(e) {
+    if (!isEditMode) return;
+    this.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    if (!isEditMode) return;
+    e.stopPropagation();
+    this.classList.remove('drag-over');
+
+    if (draggedCard !== this) {
+        // Troca os cartões de lugar no HTML Grid
+        const grid = document.getElementById('membersGrid');
+        const allCards = Array.from(grid.children);
+        const draggedIdx = allCards.indexOf(draggedCard);
+        const targetIdx = allCards.indexOf(this);
+
+        if (draggedIdx < targetIdx) {
+            grid.insertBefore(draggedCard, this.nextSibling);
+        } else {
+            grid.insertBefore(draggedCard, this);
+        }
+    }
+}
+
+function handleDragEnd() {
+    if (!isEditMode) return;
+    this.classList.remove('dragging');
+    document.querySelectorAll('.member-card').forEach(card => {
+        card.classList.remove('drag-over');
+    });
+}
+
+// Função para adicionar membro com suporte a Drag and Drop
+function addMember(name = '', turnOrRole = '', imgSrc = '', isCustomRole = false) {
+    const grid = document.getElementById('membersGrid');
+    const card = document.createElement('div');
+    card.className = 'member-card';
+
+    if (isEditMode) {
+        card.classList.add('editable');
+        card.setAttribute('draggable', 'true');
+    }
+
+    // Eventos de arraste
+    card.addEventListener('dragstart', handleDragStart);
+    card.addEventListener('dragover', handleDragOver);
+    card.addEventListener('dragenter', handleDragEnter);
+    card.addEventListener('dragleave', handleDragLeave);
+    card.addEventListener('drop', handleDrop);
+    card.addEventListener('dragend', handleDragEnd);
+
+    let imgTag = imgSrc ? `<img src="${imgSrc}" style="display:block;">` : '';
+    let placeholderStyle = imgSrc ? 'style="display:none;"' : '';
+
+    let secondFieldHTML = '';
+    if (isCustomRole) {
+        secondFieldHTML = `
+            <input type="text" class="turn-select" placeholder="Função / Cargo" value="${turnOrRole}">
+        `;
+    } else {
+        secondFieldHTML = `
+            <select class="turn-select">
+                <option value="" ${turnOrRole === '' ? 'selected' : ''} disabled>Selecione o Turno</option>
+                <option value="T1" ${turnOrRole === 'T1' ? 'selected' : ''}>Turno: T1</option>
+                <option value="T2" ${turnOrRole === 'T2' ? 'selected' : ''}>Turno: T2</option>
+                <option value="T3" ${turnOrRole === 'T3' ? 'selected' : ''}>Turno: T3</option>
+                <option value="ADM" ${turnOrRole === 'ADM' ? 'selected' : ''}>Turno: ADM</option>
+            </select>
+        `;
+    }
+
+    card.innerHTML = `
+        <button class="btn-remove" onclick="removeMember(this)" title="Remover membro">×</button>
+        <div class="photo-container">
+            ${imgTag}
+            <span class="photo-placeholder" ${placeholderStyle}>FOTO</span>
+            <input type="file" accept="image/*" onchange="loadMemberPhoto(event, this)">
+        </div>
+        <div class="info-box">
+            <input type="text" class="name-input" placeholder="Nome:" value="${name}">
+            ${secondFieldHTML}
+        </div>
+    `;
+    grid.appendChild(card);
+}
+
+// Atalho para adicionar um cargo especial
+function addLeader() {
+    addMember('', 'Técnico de Segurança', '', true);
+}
+
+function removeMember(button) {
+    const card = button.closest('.member-card');
+    card.remove();
+}
+
+// Inicia com os 15 membros padrão ao carregar a página
+window.onload = function() {
+    for (let i = 0; i < 15; i++) {
+        addMember();
+    }
+};
+    </script>
+</body>
+</html>
